@@ -29,6 +29,7 @@
 #include "system_ability.h"
 
 #include "idevice_security_level.h"
+#include "utils_timer.h"
 
 namespace OHOS {
 namespace Security {
@@ -53,6 +54,7 @@ private:
 #ifdef PLUGIN_SO_PATH
     void *handle_;
 #endif
+    TimerHandle unloadTimerHandle_ {0};
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security

@@ -66,7 +66,7 @@ private:
         std::mutex mutex_;
     };
 
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, uint32_t &cookie, uint32_t &result, uint32_t &level);
+    int32_t OnRequest(uint32_t code, MessageParcel &data, uint32_t &cookie, uint32_t &result, uint32_t &level);
     int32_t ResponseDeviceSecurityLevel(uint32_t cookie, uint32_t result, uint32_t level);
     CallbackInfoHolder holder_;
     sptr<DeviceSecurityLevelCallbackStub> stub_;

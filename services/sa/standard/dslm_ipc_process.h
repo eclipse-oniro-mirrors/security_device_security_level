@@ -50,9 +50,6 @@ public:
         std::map<uint64_t, sptr<IRemoteObject>> map_;
         std::mutex mutex_;
     };
-
-private:
-    TimerHandle unloadTimerHandle_ {0};
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security

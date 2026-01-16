@@ -16,6 +16,7 @@
 #include "dslm_service.h"
 
 #include <dlfcn.h>
+#include <mutex>
 #include <thread>
 
 #include "iremote_object.h"
@@ -24,9 +25,12 @@
 #include "string_ex.h"
 
 #include "device_security_defines.h"
+#include "dslm_device_list.h"
 #include "dslm_hidumper.h"
 #include "dslm_ipc_process.h"
 #include "dslm_rpc_process.h"
+
+constexpr uint32_t UNLOAD_TIMEOUT = 10000;
 
 namespace OHOS {
 namespace Security {
@@ -39,6 +43,43 @@ DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, r
     ProcessLoadPlugin();
 }
 
+static void TimerProcessUnloadSystemAbility(const void *context)
+{
+    (void)context;
+
+    if (!JudgeListDeviceType()) {
+        return;
+    }
+
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        SECURITY_LOG_ERROR("get samgr failed");
+        return;
+    }
+
+    int32_t ret = samgrProxy->UnloadSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
+    if (ret != ERR_OK) {
+        SECURITY_LOG_ERROR("unload system ability failed");
+        return;
+    }
+    SECURITY_LOG_INFO("unload system ability succeed");
+}
+
+static void SetSystemAbilityUnloadSchedule(TimerHandle &handle)
+{
+    if (!JudgeListDeviceType()) {
+        return;
+    }
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
+
+    if (handle != 0) {
+        DslmUtilsStopTimerTask(handle);
+    }
+
+    handle = DslmUtilsStartOnceTimerTask(UNLOAD_TIMEOUT, TimerProcessUnloadSystemAbility, nullptr);
+}
+
 void DslmService::OnStart()
 {
     SECURITY_LOG_INFO("start");
@@ -49,6 +90,7 @@ void DslmService::OnStart()
         if (!Publish(this)) {
             SECURITY_LOG_ERROR("publish service failed");
         }
+        SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
     });
     thread.detach();
 }
@@ -83,6 +125,8 @@ int32_t DslmService::Dump(int fd, const std::vector<std::u16string> &args)
 
 int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
+    SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
+
     do {
         if (IDeviceSecurityLevel::GetDescriptor() != data.ReadInterfaceToken()) {
             SECURITY_LOG_ERROR("local descriptor is not equal remote");
