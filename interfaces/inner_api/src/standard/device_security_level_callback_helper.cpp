@@ -39,7 +39,7 @@ constexpr uint32_t MAX_CALLBACKS_NUM = 128;
 DeviceSecurityLevelCallbackHelper::DeviceSecurityLevelCallbackHelper()
 {
     auto request = [this](uint32_t code, MessageParcel &data, uint32_t &cookie, uint32_t &result, uint32_t &level) {
-        return this->OnRemoteRequest(code, data, cookie, result, level);
+        return this->OnRequest(code, data, cookie, result, level);
     };
     auto response = [this](uint32_t cookie, uint32_t result, uint32_t level) {
         return this->ResponseDeviceSecurityLevel(cookie, result, level);
@@ -83,7 +83,7 @@ bool DeviceSecurityLevelCallbackHelper::Withdraw(uint32_t cookie)
     return true;
 }
 
-int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, MessageParcel &data, uint32_t &cookie,
+int32_t DeviceSecurityLevelCallbackHelper::OnRequest(uint32_t code, MessageParcel &data, uint32_t &cookie,
     uint32_t &result, uint32_t &level)
 {
     if (code == DeviceSecurityLevelCallbackStub::CMD_SET_DEVICE_SECURITY_LEVEL) {

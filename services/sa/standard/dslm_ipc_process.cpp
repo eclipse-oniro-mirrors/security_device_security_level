@@ -33,14 +33,11 @@ constexpr uint32_t MAX_TIMEOUT = 60;
 constexpr uint32_t MIN_TIMEOUT = 1;
 constexpr uint32_t WARNING_GATE = 64;
 constexpr uint32_t COOKIE_SHIFT = 32;
-constexpr uint32_t UNLOAD_TIMEOUT = 10000;
 } // namespace
 
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-static void TimerProcessUnloadSystemAbility(const void *context);
-static void SetSystemAbilityUnloadSchedule(TimerHandle &handle);
 
 static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
 {
@@ -65,8 +62,6 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
 int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
     sptr<IRemoteObject> &object, uint32_t &cookie)
 {
-    SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
-
     uint32_t expected = sizeof(DeviceIdentify) + sizeof(RequestOption) + sizeof(uint32_t);
     uint32_t actual = data.GetReadableBytes();
     if (expected >= actual) {
@@ -117,41 +112,6 @@ int32_t DslmIpcProcess::DslmSetResponseToParcel(MessageParcel &reply, uint32_t s
         return ERR_IPC_RET_PARCEL_ERR;
     }
     return SUCCESS;
-}
-
-static void TimerProcessUnloadSystemAbility(const void *context)
-{
-    (void)context;
-
-    if (!JudgeListDeviceType()) {
-        return;
-    }
-
-    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgrProxy == nullptr) {
-        SECURITY_LOG_ERROR("get samgr failed");
-        return;
-    }
-
-    int32_t ret = samgrProxy->UnloadSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
-    if (ret != ERR_OK) {
-        SECURITY_LOG_ERROR("unload system ability failed");
-        return;
-    }
-    SECURITY_LOG_INFO("unload system ability succeed");
-}
-
-static void SetSystemAbilityUnloadSchedule(TimerHandle &handle)
-{
-    if (!JudgeListDeviceType()) {
-        return;
-    }
-
-    if (handle != 0) {
-        DslmUtilsStopTimerTask(handle);
-    }
-
-    handle = DslmUtilsStartOnceTimerTask(UNLOAD_TIMEOUT, TimerProcessUnloadSystemAbility, nullptr);
 }
 
 int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(const DeviceIdentify *identify, const RequestOption *option,
