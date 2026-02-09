@@ -208,12 +208,12 @@ static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceId
 
 static int32_t VerifyLiteDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
-    if (credBuff->credLen > UINT16_MAX) {
+    if (credBuff->credLen >= DSLM_CRED_STR_LEN_MAX) {
         return ERR_MEMORY_ERR;
     }
 
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
-    if (memcpy_s(credStr, DSLM_CRED_STR_LEN_MAX, credBuff->credVal, credBuff->credLen + 1) != EOK) {
+    if (memcpy_s(credStr, DSLM_CRED_STR_LEN_MAX - 1, credBuff->credVal, credBuff->credLen) != EOK) {
         return ERR_MEMORY_ERR;
     }
 
