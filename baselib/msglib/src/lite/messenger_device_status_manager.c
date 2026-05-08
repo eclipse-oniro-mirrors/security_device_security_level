@@ -65,7 +65,7 @@ static void ProcessDeviceStatusReceived(const uint8_t *data, uint32_t len)
         return;
     }
     QueueStatusData *queueData = (QueueStatusData *)data;
-    if (sizeof(QueueStatusData) != len) {
+    if (len != sizeof(QueueStatusData)) {
         SECURITY_LOG_ERROR("ProcessDeviceStatusReceived, invalid input");
         return;
     }
