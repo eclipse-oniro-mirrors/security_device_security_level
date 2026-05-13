@@ -339,7 +339,7 @@ bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level)
 
 bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level)
 {
-    if (devId == nullptr || level == NULL) {
+    if (devId == nullptr || level == nullptr) {
         return false;
     }
 

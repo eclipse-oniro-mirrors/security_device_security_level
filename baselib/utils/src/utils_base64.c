@@ -123,7 +123,7 @@ static int32_t Base64Decode(const uint8_t *from, uint8_t *to, uint32_t toCheckLe
     if (from[fromLen - 2] == '=') { /* if last 2-bit is null, make it "=" */
         toLen--;
     }
-    if (toCheckLen < toLen) {
+    if (toCheckLen <= toLen) {
         return -1;
     }
 
@@ -193,13 +193,13 @@ int32_t Base64DecodeApp(const uint8_t *src, uint8_t **to)
         return 0;
     }
 
-    uint32_t decodedLen = strlen((char *)src) / 4 * 3; /* Base64 Decode size */
-    if (decodedLen + 1 > MAX_MALLOC_LEN) {
+    uint32_t decodedLen = (strlen((char *)src) / 4 * 3) + 1; /* Base64 Decode size */
+    if (decodedLen > MAX_MALLOC_LEN) {
         SECURITY_LOG_DEBUG("decodedLen error");
         return 0;
     }
 
-    uint8_t *decoded = (uint8_t *)MALLOC(decodedLen + 1);
+    uint8_t *decoded = (uint8_t *)MALLOC(decodedLen);
     if (decoded == NULL) {
         SECURITY_LOG_DEBUG("malloc failed, decoded is null");
         return 0;
