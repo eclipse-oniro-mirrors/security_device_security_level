@@ -509,6 +509,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             .credTypeArray = {CRED_TYPE_STANDARD, CRED_TYPE_SMALL},
         };
         InitDslmCredentialFunctions(&func);
+        atexit(UnInitService);
         initCount = 1;
     }
     OHOS::Security::DeviceSecurityLevel::DslmFuzzTest(data, size);
