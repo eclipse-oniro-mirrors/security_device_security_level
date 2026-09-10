@@ -137,5 +137,7 @@ if (defined(ohos_lite)) {
 
     part_name = "device_security_level"
     subsystem_name = "security"
+
+    version_script = "dslm_sdk.versionscript"
   }
 }
