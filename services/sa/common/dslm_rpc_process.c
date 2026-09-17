@@ -115,6 +115,6 @@ uint32_t InitService(void)
 
 void UnInitService(void)
 {
-    DeinitDslmProcess();
     DeinitMessenger();
+    DeinitDslmProcess();
 }
