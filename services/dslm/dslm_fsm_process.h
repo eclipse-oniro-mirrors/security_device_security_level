@@ -50,6 +50,7 @@ void ScheduleDslmStateMachine(DslmDeviceInfo *info, uint32_t event, const void *
 uint32_t GetCurrentMachineState(const DslmDeviceInfo *info);
 void LockDslmStateMachine(DslmDeviceInfo *info);
 void UnLockDslmStateMachine(DslmDeviceInfo *info);
+void StopAllDslmTimer(DslmDeviceInfo *info);
 
 #ifdef __cplusplus
 }

@@ -22,6 +22,7 @@
 
 #include "device_security_defines.h"
 #include "dslm_core_process.h"
+#include "dslm_device_list.h"
 #include "dslm_hievent.h"
 #include "dslm_hitrace.h"
 #include "dslm_messenger_wrapper.h"
@@ -116,5 +117,6 @@ uint32_t InitService(void)
 void UnInitService(void)
 {
     DeinitMessenger();
+    StopAllDslmTimerAndShutdown();
     DeinitDslmProcess();
 }

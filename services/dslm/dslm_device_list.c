@@ -30,6 +30,7 @@
 #include "utils_mem.h"
 #include "utils_mutex.h"
 #include "utils_state_machine.h"
+#include "utils_timer.h"
 
 #define MAX_DEVICE_CNT 128
 #define DEFAULT_TYPE 10
@@ -202,4 +203,19 @@ void DestroyAllDslmDeviceInfo(void)
         FREE(info);
     }
     UnlockMutex(GetDeviceListMutex());
+}
+
+void StopAllDslmTimerAndShutdown(void)
+{
+    ListNode *node = NULL;
+    ListNode *temp = NULL;
+
+    LockMutex(GetDeviceListMutex());
+    FOREACH_LIST_NODE_SAFE (node, GetDeviceList(), temp) {
+        DslmDeviceInfo *info = LIST_ENTRY(node, DslmDeviceInfo, linkNode);
+        StopAllDslmTimer(info);
+    }
+    UnlockMutex(GetDeviceListMutex());
+
+    DslmUtilsShutdownTimer();
 }
