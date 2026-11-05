@@ -71,6 +71,12 @@ void DslmUtilsStopTimerTask(TimerHandle handle)
     UtilsTimer &st = DelayedRefSingleton<UtilsTimer>::GetInstance();
     st.Unregister(static_cast<uint32_t>(handle));
 }
+
+void DslmUtilsShutdownTimer(void)
+{
+    UtilsTimer &st = DelayedRefSingleton<UtilsTimer>::GetInstance();
+    st.Shutdown();
+}
 #ifdef __cplusplus
 }
 #endif

@@ -45,6 +45,8 @@ bool JudgeListDeviceType(void);
 
 void DestroyAllDslmDeviceInfo(void);
 
+void StopAllDslmTimerAndShutdown(void);
+
 #ifdef __cplusplus
 }
 #endif

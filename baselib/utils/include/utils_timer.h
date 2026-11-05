@@ -32,6 +32,8 @@ TimerHandle DslmUtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, c
 
 void DslmUtilsStopTimerTask(TimerHandle handle);
 
+void DslmUtilsShutdownTimer(void);
+
 #ifdef __cplusplus
 }
 #endif

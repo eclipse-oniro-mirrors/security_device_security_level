@@ -95,7 +95,9 @@ static void TimerProcessSdkRequestTimeout(const void *context)
         return;
     }
     // the context info will never be freed, so feel free use it.
-    ScheduleDslmStateMachine((DslmDeviceInfo *)context, EVENT_SDK_TIMEOUT, NULL);
+    DslmDeviceInfo *info = (DslmDeviceInfo *)context;
+    info->sdkTimerHandle = 0;
+    ScheduleDslmStateMachine(info, EVENT_SDK_TIMEOUT, NULL);
 }
 
 static void StopSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
@@ -104,6 +106,23 @@ static void StopSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
         DslmUtilsStopTimerTask(info->timeHandle);
         info->timeHandle = 0;
     }
+}
+
+static void StopSdkRequestTimer(DslmDeviceInfo *info)
+{
+    if (info->sdkTimerHandle != 0) {
+        DslmUtilsStopTimerTask(info->sdkTimerHandle);
+        info->sdkTimerHandle = 0;
+    }
+}
+
+void StopAllDslmTimer(DslmDeviceInfo *info)
+{
+    if (info == NULL) {
+        return;
+    }
+    StopSendDeviceInfoRequestTimer(info);
+    StopSdkRequestTimer(info);
 }
 
 static void StartSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
@@ -264,7 +283,8 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
         return true;
     }
 
-    DslmUtilsStartOnceTimerTask(notify->keep, TimerProcessSdkRequestTimeout, deviceInfo);
+    deviceInfo->sdkTimerHandle =
+        DslmUtilsStartOnceTimerTask(notify->keep, TimerProcessSdkRequestTimeout, deviceInfo);
     return true;
 }
 

@@ -50,6 +50,7 @@ typedef struct DslmDeviceInfo {
     uint64_t lastVerifyTime;
     uint64_t transNum;
     TimerHandle timeHandle;
+    TimerHandle sdkTimerHandle;
     uint32_t queryTimes;
     uint32_t result;
     DslmCredInfo credInfo;
