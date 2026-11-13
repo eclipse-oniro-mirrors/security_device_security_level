@@ -360,8 +360,8 @@ HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
         ASSERT_NE(to, nullptr);
 
         EXPECT_EQ(3, ret);
-        EXPECT_EQ('\xEF', to[1]);
-        EXPECT_EQ('\xDD', to[2]);
+        EXPECT_EQ(0xEF, to[1]);
+        EXPECT_EQ(0xDD, to[2]);
         FREE(to);
     }
 }
