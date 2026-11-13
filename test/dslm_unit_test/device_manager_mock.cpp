@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <new>
+
 #include "device_manager.h"
 
 #include "device_manager_mock.h"
@@ -57,8 +59,9 @@ DeviceManagerMock::~DeviceManagerMock()
 
 DeviceManagerMock &DeviceManagerMock::Instance()
 {
-    static testing::NiceMock<DeviceManagerMock> inst;
-    return inst;
+    static testing::NiceMock<DeviceManagerMock> *inst = new (std::nothrow) testing::NiceMock<DeviceManagerMock>();
+    testing::Mock::AllowLeak(inst);
+    return *inst;
 }
 } // namespace DistributedHardware
 } // namespace OHOS
