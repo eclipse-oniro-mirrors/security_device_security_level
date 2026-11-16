@@ -41,6 +41,7 @@ DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, r
 {
     SECURITY_LOG_INFO("object initialization");
     ProcessLoadPlugin();
+    InitProcessMutex();
 }
 
 static void TimerProcessUnloadSystemAbility(const void *context)
@@ -127,6 +128,8 @@ int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
 {
     SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
 
+    int32_t ret = ERR_REQUEST_CODE_ERR;
+    LockMutex(GetProcessMutex());
     do {
         if (IDeviceSecurityLevel::GetDescriptor() != data.ReadInterfaceToken()) {
             SECURITY_LOG_ERROR("local descriptor is not equal remote");
@@ -134,13 +137,16 @@ int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
         }
         switch (code) {
             case CMD_GET_DEVICE_SECURITY_LEVEL:
-                return ProcessGetDeviceSecurityLevel(data, reply);
+                ret = ProcessGetDeviceSecurityLevel(data, reply);
+                break;
             default:
-                return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+                ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+                break;
         }
     } while (false);
+    UnlockMutex(GetProcessMutex());
 
-    return ERR_REQUEST_CODE_ERR;
+    return ret;
 }
 
 int32_t DslmService::RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,

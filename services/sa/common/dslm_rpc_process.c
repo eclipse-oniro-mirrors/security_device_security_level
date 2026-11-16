@@ -35,6 +35,17 @@
 #define SLEEP_TIME (1000 * 500)
 #define TRY_TIMES 20
 
+Mutex *GetProcessMutex(void)
+{
+    static Mutex mutex = INITED_MUTEX;
+    return &mutex;
+}
+
+void InitProcessMutex(void)
+{
+    InitRecursiveMutex(GetProcessMutex());
+}
+
 int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len)
 {
     if (devId == NULL || msg == NULL || len == 0) {
@@ -55,6 +66,7 @@ int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint3
         return ERR_INVALID_PARA;
     }
 
+    LockMutex(GetProcessMutex());
     switch (packet->type) {
         case MSG_TYPE_DSLM_CRED_REQUEST:
             ret = OnPeerMsgRequestInfoReceived(devId, packet->payload, packet->length);
@@ -69,6 +81,7 @@ int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint3
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("ret = %{public}d, packet->type = %{public}u", ret, packet->type);
     }
+    UnlockMutex(GetProcessMutex());
     FreeMessagePacket(packet);
     return ret;
 }
@@ -82,6 +95,7 @@ uint32_t InitService(void)
 {
     uint32_t times = 0;
     SECURITY_LOG_INFO("InitService");
+    LockMutex(GetProcessMutex());
 #ifdef L0_MINI
     DslmStartProcessTrace("InitService");
     DslmCredFunctionsConstructor();
@@ -91,6 +105,7 @@ uint32_t InitService(void)
     if (ret != SUCCESS) {
         DslmFinishProcessTrace();
         ReportHiEventServiceStartFailed(ret);
+        UnlockMutex(GetProcessMutex());
         SECURITY_LOG_ERROR("InitMessenger ret = %{public}u", ret);
         return ret;
     }
@@ -110,13 +125,16 @@ uint32_t InitService(void)
         times++;
     }
     DslmFinishProcessTrace();
+    UnlockMutex(GetProcessMutex());
 
     return SUCCESS;
 }
 
 void UnInitService(void)
 {
+    LockMutex(GetProcessMutex());
     DeinitMessenger();
     StopAllDslmTimerAndShutdown();
     DeinitDslmProcess();
+    UnlockMutex(GetProcessMutex());
 }
