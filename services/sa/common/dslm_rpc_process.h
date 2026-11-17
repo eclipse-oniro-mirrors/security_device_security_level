@@ -18,9 +18,15 @@
 
 #include <stdint.h>
 
+#include "utils_mutex.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+Mutex *GetProcessMutex(void);
+
+void InitProcessMutex(void);
 
 uint32_t InitService(void);
 
