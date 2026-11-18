@@ -229,15 +229,19 @@ uint32_t QueueWork(WorkQueue *queue, WorkProcess process, uint8_t *data, uint32_
     if ((queue == NULL) || (process == NULL)) {
         return WORK_QUEUE_NULL_PTR;
     }
+    (void)pthread_mutex_lock(&queue->mutex);
     if (queue->state != RUN) {
+        (void)pthread_mutex_unlock(&queue->mutex);
         return WORK_QUEUE_STATE_ERR;
     }
     if (queue->size >= queue->capacity) {
+        (void)pthread_mutex_unlock(&queue->mutex);
         return WORK_QUEUE_FULL;
     }
 
     Worker *worker = MALLOC(sizeof(Worker));
     if (worker == NULL) {
+        (void)pthread_mutex_unlock(&queue->mutex);
         return WORK_QUEUE_MALLOC_ERR;
     }
     (void)memset_s(worker, sizeof(Worker), 0, sizeof(Worker));
@@ -247,7 +251,6 @@ uint32_t QueueWork(WorkQueue *queue, WorkProcess process, uint8_t *data, uint32_
     worker->dataBuff = data;
     worker->process = process;
 
-    (void)pthread_mutex_lock(&queue->mutex);
     AddListNodeBefore(&worker->linkNode, &queue->head);
     queue->size++;
 

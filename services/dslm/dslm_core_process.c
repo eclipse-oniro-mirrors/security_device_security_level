@@ -111,27 +111,9 @@ int32_t OnPeerMsgResponseInfoReceived(const DeviceIdentify *deviceId, const uint
 
 int32_t OnMsgSendResultNotifier(const DeviceIdentify *deviceId, uint64_t transNo, uint32_t result)
 {
-    SECURITY_LOG_INFO("msg trans is %{public}u result %{public}u", (uint32_t)transNo, result);
-
-    if (result == SUCCESS) {
-        return SUCCESS;
-    }
-
-    DslmDeviceInfo *deviceInfo = GetDslmDeviceInfo(deviceId);
-    if (deviceInfo == NULL) {
-        return SUCCESS;
-    }
-
-    SECURITY_LOG_INFO("current DslmDeviceInfo transNum is %{public}u", (uint32_t)deviceInfo->transNum);
-    if (deviceInfo->transNum != transNo) {
-        return SUCCESS;
-    }
-
-    if (deviceInfo->credInfo.credLevel != 0) {
-        return SUCCESS;
-    }
-
-    ScheduleDslmStateMachine(deviceInfo, EVENT_MSG_SEND_FAILED, &result);
+    (void)deviceId;
+    (void)transNo;
+    (void)result;
 
     return SUCCESS;
 }
@@ -252,11 +234,12 @@ bool InitDslmProcess(void)
         return false;
     }
 
+    LockMutex(&initMutex);
     if (isInited == true) {
+        UnlockMutex(&initMutex);
         return true;
     }
 
-    LockMutex(&initMutex);
     bool result = InitSelfDeviceSecureLevel();
     if (result) {
         isInited = true;

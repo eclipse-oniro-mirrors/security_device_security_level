@@ -74,7 +74,7 @@ static int32_t DslmGetRequestFromParcel(IpcIo *req, DeviceIdentify *identity,
     }
     ReadUint32(req, &option->extra);
     ReadUint32(req, cookie);
-    if (cookie == 0) {
+    if (*cookie == 0) {
         SECURITY_LOG_ERROR("unexpected input, cookie error");
         return ERR_INVALID_PARA;
     }
